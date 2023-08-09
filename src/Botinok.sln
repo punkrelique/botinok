@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Botinok", "Botinok\Botinok.fsproj", "{86BB4DC9-D4B4-4EA5-8FED-39EC0508A780}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Botinok.Libgen", "Botinok.Libgen\Botinok.Libgen.fsproj", "{7E0CC9E6-16CD-4B5F-9BA5-AA7B5CD5D638}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Botinok.Common", "Botinok.Common\Botinok.Common.fsproj", "{A5EAF026-D997-4BDD-B6F4-547D209D132E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{86BB4DC9-D4B4-4EA5-8FED-39EC0508A780}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86BB4DC9-D4B4-4EA5-8FED-39EC0508A780}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86BB4DC9-D4B4-4EA5-8FED-39EC0508A780}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86BB4DC9-D4B4-4EA5-8FED-39EC0508A780}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E0CC9E6-16CD-4B5F-9BA5-AA7B5CD5D638}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E0CC9E6-16CD-4B5F-9BA5-AA7B5CD5D638}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E0CC9E6-16CD-4B5F-9BA5-AA7B5CD5D638}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E0CC9E6-16CD-4B5F-9BA5-AA7B5CD5D638}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5EAF026-D997-4BDD-B6F4-547D209D132E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5EAF026-D997-4BDD-B6F4-547D209D132E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5EAF026-D997-4BDD-B6F4-547D209D132E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5EAF026-D997-4BDD-B6F4-547D209D132E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
