@@ -23,7 +23,7 @@ let main _ =
 
         let botConfig =
             { Config.defaultConfig with
-                Token = appConfig["Bot:Token"] }
+                Token = appConfig["Botinok:Token"] }
 
         botConfig
         |> sprintf "Bot configuration: %A"

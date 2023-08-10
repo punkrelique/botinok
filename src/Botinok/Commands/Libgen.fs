@@ -60,9 +60,9 @@ let private createDefaultQuery book page = { Req = book; Page = page; Column = "
 
 let private libgenClient = LibgenClient()
 
-let searchBooks book (page: string) (ctx: UpdateContext) config (chatId: int64) =
+let searchBooks book (ctx: UpdateContext) config (chatId: int64) =
     let booksResult =
-        libgenClient.Search(createDefaultQuery book (int page))
+        libgenClient.Search(createDefaultQuery book 1)
         |> Async.AwaitTask
         |> Async.RunSynchronously
 

@@ -27,5 +27,5 @@ let updateArrived (ctx: UpdateContext) =
     | _ ->
         processCommands ctx [| 
             cmd "/start"  (fun _ -> help |> wrap ctx) 
-            cmdScan "%s" (fun book _ -> searchBooks "C# in depth" "1" ctx |> wrap ctx)
+            cmdScan "/search %s" (fun book _ -> searchBooks book ctx |> wrap ctx)
         |] |> ignore
