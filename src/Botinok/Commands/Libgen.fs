@@ -1,6 +1,6 @@
 ﻿module Botinok.Commands.Libgen
 
-open Botinok.Libgen.Models
+open Botinok.Libgen.Types
 open Botinok.LibgenClient
 open Funogram.Telegram
 open Funogram.Telegram.Bot
@@ -23,46 +23,34 @@ let private bookListMarkup (books: Book seq) book page =
     let navButtons =
         [| [| if page <> 1 then
                   InlineKeyboardButton.Create(
-                      "prev",
+                      "пред",
                       callbackData = $"prev/{book}/{if page <> 1 then page - 1 else page}")
               else ()
-              InlineKeyboardButton.Create("next", callbackData = $"next/{book}/{page + 1}") |] |]
+              InlineKeyboardButton.Create("след", callbackData = $"next/{book}/{page + 1}") |] |]
 
     let keyboard = Array.append bookButtons navButtons
 
     keyboard
     
-let private bookInfo (book: Book) =
-    let info = $"""
-Name: {book.Name}
-Language: {book.Language}
-Extension: {book.Extension}
-Size: {book.Size}
-Year: {book.Year}
-Authors: {book.Authors |> String.concat " "}
-Edition: {book.Edition}
-Pages: {book.Pages}
-Publisher: {book.Publisher}
-ISBN: {book.ISBN}
-Id: {book.Id}
-"""
+let private bookInfoTemplate (book: Book) =
     let markup = Markup.InlineKeyboardMarkup { InlineKeyboard = [|
         [| 
             InlineKeyboardButton.Create("скачать", callbackData = $"book/download/{book.Id}") 
         |]
     |] }
-    
-    (info, markup)
+
+    (book.ToString(), markup)
         
 let private callbackMessageId (ctx: UpdateContext) = ctx.Update.CallbackQuery.Value.Message.Value.MessageId
 let private commandMessageId (ctx: UpdateContext) = ctx.Update.Message.Value.MessageId
-let private createDefaultQuery book page = { Req = book; Page = page; Column = "def"; Phrase = 1; Open = 0; Res = 5; View = "simple"; LgTopic = "libgen" }
 
 let private libgenClient = LibgenClient()
 
-let searchBooks book (ctx: UpdateContext) config (chatId: int64) =
+let searchBooks (book: string) (ctx: UpdateContext) config (chatId: int64) =
+    if book.Length < 3 then Req.SendMessage.Make(chatId, "длина запроса должна быть больше 2 символов", replyToMessageId = commandMessageId ctx) |> bot config
+    
     let booksResult =
-        libgenClient.Search(createDefaultQuery book 1)
+        libgenClient.Search(SearchQuery.createDefaultQuery(book, 1))
         |> Async.AwaitTask
         |> Async.RunSynchronously
 
@@ -97,7 +85,7 @@ let getBook id (ctx: UpdateContext) config (chatId: int64) =
 
     match bookResult with
     | Ok book ->
-        let info, markup = bookInfo book
+        let info, markup = bookInfoTemplate book
         Req.SendMessage.Make(chatId, info, replyMarkup = markup, replyToMessageId = callbackMessageId ctx)
         |> bot config
     | Error error ->
@@ -108,7 +96,7 @@ let getAnotherPages book (page: string) (ctx: UpdateContext) config (chatId: int
     let page = int page
 
     let booksResult =
-        libgenClient.Search(createDefaultQuery book page)
+        libgenClient.Search(SearchQuery.createDefaultQuery(book, page))
         |> Async.AwaitTask
         |> Async.RunSynchronously
 

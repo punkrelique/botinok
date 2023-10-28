@@ -3,9 +3,9 @@
 open System
 open System.Net.Http
 open System.Threading.Tasks
-open System.Web
 open Botinok.Common
 open Botinok.Libgen.Parser
+open Botinok.Libgen.Types
 
 [<Literal>]
 let linksPageUrl = "http://library.lol/main/"
@@ -13,40 +13,11 @@ let linksPageUrl = "http://library.lol/main/"
 [<Literal>]
 let baseAddress = "https://www.libgen.is/"
 
-type SearchQuery = {
-    Req: string
-    LgTopic: string
-    Open: int
-    View: string
-    Res: int
-    Phrase: int
-    Column: string
-    Page: int
-}
-
 type LibgenClient () =
     let httpClient = new HttpClient()
-    let buildSearchQuery (query: SearchQuery) =
-        "?"
-        +
-        (
-             [
-                "req", query.Req
-                "lg_topic", query.LgTopic
-                "open", string query.Open
-                "view", query.View
-                "res", string query.Res
-                "phrase", string query.Phrase
-                "column", query.Column
-                "page", string query.Page
-            ]
-            |> List.map (fun (k, v) -> sprintf "%s=%s" (HttpUtility.UrlEncode k) (HttpUtility.UrlEncode v))
-            |> String.concat("&")
-        ) 
-        
     member this.Search (query: SearchQuery) = task {
         try
-            let! response = httpClient.GetAsync(baseAddress + "search.php" + buildSearchQuery query)
+            let! response = httpClient.GetAsync(baseAddress + "search.php" + query.asQueryParams())
             let! content = response.Content.ReadAsStringAsync()
             let books = extractBooks content
             
@@ -88,7 +59,7 @@ type LibgenClient () =
 
             $"Book download request: %A{bookId}" |> logInfo
             
-            let! document = tasks |> Async.AwaitTask
+            use! document = tasks |> Async.AwaitTask
             let contentType = links[0].Split '.' |> Seq.last
 
             return Result.Ok (document, $"{bookId}.{contentType}")

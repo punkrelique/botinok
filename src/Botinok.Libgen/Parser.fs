@@ -1,7 +1,7 @@
 ﻿module Botinok.Libgen.Parser
 
 open FSharp.Data
-open Botinok.Libgen.Models
+open Botinok.Libgen.Types
 
 [<Literal>]
 let private newLine = "\r\n"
