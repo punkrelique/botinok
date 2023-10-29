@@ -4,7 +4,7 @@ open Funogram.Telegram
 open Botinok.Core
 
 let private text = """Доступные команды:
-/search <book name> - поиск книжек хуижек
+/search <book name> - поиск книжек
 """
 
 let help config (chatId: int64) =
