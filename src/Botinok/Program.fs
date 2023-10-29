@@ -18,6 +18,7 @@ let main _ =
 
         let appConfig =
             ConfigurationBuilder()
+                .AddEnvironmentVariables()
                 .AddJsonFile("appsettings.json")
                 .Build()
 
