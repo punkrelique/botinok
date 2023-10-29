@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  botinok:
+    build:
+      context: ./src/Botinok/
+      dockerfile: ./Dockerfile
+    image: punkrelique/botinok
+    restart: always
+    environment:
+      - Botinok__Token=""
+    ports:
+      - "3000:3000"
