@@ -1,8 +1,8 @@
 ﻿module Botinok.Commands.Libgen
 
+open Botinok
 open Botinok.Libgen.Types
 open Botinok.LibgenClient
-open Funogram.Telegram
 open Funogram.Telegram.Bot
 open Funogram.Telegram.Types
 open Botinok.Core
@@ -32,7 +32,7 @@ let private bookListMarkup (books: Book seq) book page =
 
     keyboard
     
-let private bookInfoTemplate (book: Book) =
+let private bookInfoMarkup (book: Book) =
     let markup = Markup.InlineKeyboardMarkup { InlineKeyboard = [|
         [| 
             InlineKeyboardButton.Create("скачать", callbackData = $"book/download/{book.Id}") 
@@ -40,14 +40,12 @@ let private bookInfoTemplate (book: Book) =
     |] }
 
     (book.ToString(), markup)
-        
-let private callbackMessageId (ctx: UpdateContext) = ctx.Update.CallbackQuery.Value.Message.Value.MessageId
-let private commandMessageId (ctx: UpdateContext) = ctx.Update.Message.Value.MessageId
 
 let private libgenClient = LibgenClient()
-
+ 
 let searchBooks (book: string) (ctx: UpdateContext) config (chatId: int64) =
-    if book.Length < 3 then Req.SendMessage.Make(chatId, "длина запроса должна быть больше 2 символов", replyToMessageId = commandMessageId ctx) |> bot config
+    if book.Length < 3 then
+        Requests.sendReply chatId "длина запроса должна быть больше 2 символов" ctx |> bot config
     
     let booksResult =
         libgenClient.Search(SearchQuery.createDefaultQuery(book, 1))
@@ -55,42 +53,29 @@ let searchBooks (book: string) (ctx: UpdateContext) config (chatId: int64) =
         |> Async.RunSynchronously
 
     match booksResult with
-    | Ok books ->
-        Req.SendMessage.Make(
-            chatId,
-            $"\"{book}\"",
-            replyMarkup = Markup.InlineKeyboardMarkup { InlineKeyboard = bookListMarkup books book 1 },
-            replyToMessageId = commandMessageId ctx
-        )
-        |> bot config
-    | Error error ->
-        Req.SendMessage.Make(chatId, error, replyToMessageId = commandMessageId ctx)
-        |> bot config
+    | Ok books -> Requests.sendReplyMarkup
+                      chatId
+                      $"\"{book}\""
+                      ctx
+                      (Markup.InlineKeyboardMarkup { InlineKeyboard = bookListMarkup books book 1 })
+                  |> bot config
+    | Error error -> Requests.sendReply chatId error ctx |> bot config
 
 let downloadBook id (ctx: UpdateContext) config (chatId: int64) =
-    let bookResult =
-        libgenClient.DownloadBook id |> Async.AwaitTask |> Async.RunSynchronously
+    let bookResult = libgenClient.DownloadBook id |> Async.AwaitTask |> Async.RunSynchronously
 
     match bookResult with
-    | Ok(file, name) ->
-        Req.SendDocument.Make(chatId, InputFile.File(name, file), replyToMessageId = callbackMessageId ctx)
-        |> bot config
-    | Error error ->
-        Req.SendMessage.Make(chatId, error, replyToMessageId = callbackMessageId ctx)
-        |> bot config
+    | Ok(file, name) -> Requests.sendDocument chatId name file ctx |> bot config
+    | Error error -> Requests.sendReply chatId error ctx |> bot config
     
 let getBook id (ctx: UpdateContext) config (chatId: int64) =
-    let bookResult =
-        libgenClient.GetBook id |> Async.AwaitTask |> Async.RunSynchronously
+    let bookResult = libgenClient.GetBook id |> Async.AwaitTask |> Async.RunSynchronously
 
     match bookResult with
     | Ok book ->
-        let info, markup = bookInfoTemplate book
-        Req.SendMessage.Make(chatId, info, replyMarkup = markup, replyToMessageId = callbackMessageId ctx)
-        |> bot config
-    | Error error ->
-        Req.SendMessage.Make(chatId, error, replyToMessageId = callbackMessageId ctx)
-        |> bot config
+        let info, markup = bookInfoMarkup book
+        Requests.sendReplyMarkup chatId info ctx markup |> bot config
+    | Error error -> Requests.sendReply chatId error ctx |> bot config
         
 let getAnotherPages book (page: string) (ctx: UpdateContext) config (chatId: int64) =
     let page = int page
@@ -101,13 +86,10 @@ let getAnotherPages book (page: string) (ctx: UpdateContext) config (chatId: int
         |> Async.RunSynchronously
 
     match booksResult with
-    | Ok books ->
-        Req.EditMessageReplyMarkup.Make(
-            chatId = chatId,
-            messageId = callbackMessageId ctx,
-            replyMarkup = InlineKeyboardMarkup.Create(bookListMarkup books book page)
-        )
-        |> bot config
-    | Error error ->
-        Req.SendMessage.Make(chatId = chatId, text = error, replyToMessageId = callbackMessageId ctx)
-        |> bot config
+    | Ok books -> Requests.editMessageReplyMarkup
+                      chatId
+                      ctx
+                      (InlineKeyboardMarkup.Create(bookListMarkup books book page))
+                  |> bot config
+    | Error error -> Requests.sendReply chatId error ctx |> bot config
+    

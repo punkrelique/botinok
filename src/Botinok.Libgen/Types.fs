@@ -2,7 +2,6 @@
 
 open System.Web
 
-
 type Genre =
     | NonFiction
     | Fiction

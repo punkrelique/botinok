@@ -17,7 +17,7 @@ let wrap ctx fn =
     let fromId () =
         match ctx.Update.Message with
         | Some msg -> msg.From.Value.Id
-        | None _ -> ctx.Update.CallbackQuery.Value.Message.Value.Chat.Id
+        | _ -> ctx.Update.CallbackQuery.Value.From.Id
     fn ctx.Config (fromId())
 
 let updateArrived (ctx: UpdateContext) =

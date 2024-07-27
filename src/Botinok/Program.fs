@@ -4,6 +4,7 @@ open Funogram.Telegram.Bot
 open Botinok
 open Funogram.Api
 open Funogram.Telegram
+open Funogram.Telegram.Types
 open Microsoft.Extensions.Configuration
 open Serilog
 
@@ -31,6 +32,7 @@ let main _ =
         |> logInfo
 
         let! _ = Api.deleteWebhookBase () |> api botConfig
+        
         return! startBot botConfig Commands.Base.updateArrived None
     }
     |> Async.RunSynchronously

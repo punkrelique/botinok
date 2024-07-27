@@ -3,12 +3,9 @@
 open FSharp.Data
 open Botinok.Libgen.Types
 
-[<Literal>]
-let private newLine = "\r\n"
-
 let private getId (nodes: HtmlNode) =
     nodes.TryGetAttribute("href")
-    |> Option.map (fun x -> x.Value())
+    |> Option.map (_.Value())
     |> Option.defaultValue ""
     |> fun x -> x.Split('=') |> Seq.last
 
@@ -25,29 +22,32 @@ let extractBooks content =
         let name =
             x[2].Descendants["a"]
             |> Seq.head
-            |> fun x -> x.Elements() |> Seq.head |> (fun x -> x.InnerText())
+            |> fun x -> x.Elements() |> Seq.head |> (_.InnerText())
 
-        let isbn = x[2].Descendants() |> Seq.last |> (fun x -> x.InnerText())
+        let isbn = x[2].Descendants() |> Seq.last |> (_.InnerText())
 
         let edition =
             x[2].Descendants["font"]
             |> Seq.toList
             |> fun nodes -> if nodes.Length = 3 then nodes |> List.skip 1 else nodes
             |> List.tryHead
-            |> Option.map (fun node -> node.InnerText())
+            |> Option.map (_.InnerText())
             |> Option.defaultValue ""
             |> fun text -> if (text = isbn || text = name) then "" else text
-
-        { ISBN = isbn
-          Authors =
+        
+        let authors =
             x[1].Descendants()
             |> Seq.toList
             |> List.filter (fun node ->
                 match node with
-                | HtmlText text -> text <> newLine
+                | HtmlText text -> text <> "\r\n"
                 | _ -> false)
-            |> List.map (fun x -> x.InnerText())
+            |> List.map (_.InnerText())
+        
+        let id = x[2].Descendants["a"] |> Seq.last |> getId
 
+        { ISBN = isbn
+          Authors = authors
           Name = name
           Publisher = x[3].InnerText()
           Edition = edition
@@ -56,18 +56,18 @@ let extractBooks content =
           Language = x[6].InnerText()
           Size = x[7].InnerText()
           Extension = x[8].InnerText()
-          Id = x[2].Descendants["a"] |> Seq.last |> getId })
+          Id = id })
 
 let extractLinksFromDownloadPage content =
     HtmlDocument.Parse(content).Descendants["a"]
-    |> Seq.choose (fun x -> x.TryGetAttribute("href") |> Option.map (fun a -> a.Value()))
+    |> Seq.choose (fun x -> x.TryGetAttribute("href") |> Option.map (_.Value()))
     |> Seq.take 4
     
 let extractBook content =
     let trs =
         HtmlDocument.Parse(content).Descendants["table"]
         |> Seq.head
-        |> fun x -> x.Elements()
+        |> _.Elements()
 
     { ISBN = (trs[7].Elements()[1]).InnerText()
       Authors = (trs[2].Elements()[1]).InnerText().Split(',') |> Seq.toList
